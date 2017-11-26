@@ -220,8 +220,10 @@ parseVerIdResultError o = do
     v <- parseVer o
     i <- o .:? "id"
     r <- o .:? "result" .!= Null
-    p <- if r == Null then Left <$> o .: "error" else return $ Right r
-    return (v, i, p)
+    me <- o .:? "error"
+    return $ case me of
+        Nothing -> (v, i, Right r)
+        Just e -> (v, i, Left e)
 
 -- | Create a response from a request. Use in servers.
 buildResponse :: (Monad m, FromRequest q, ToJSON r)
